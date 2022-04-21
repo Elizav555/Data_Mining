@@ -46,14 +46,17 @@ foreach (var basket in baskets.Values)
 }
 var n = prodCodeToIndex.Keys.Count;
 var firstHash = new HashFunc(1243, 12245, 40 * n);
-var secondHash = new HashFunc(2324, 4636, 40 * n);
+var secondHash = new HashFunc(2324, 1236, 40 * n);
+var thirdHash = new HashFunc(193, 135, 40 * n);
 var fisrtBuckets = new Dictionary<int, List<Tuple<int, int>>>();
 var secondBuckets = new Dictionary<int, List<Tuple<int, int>>>();
+var thirdBuckets = new Dictionary<int, List<Tuple<int, int>>>();
 foreach (var doubleton in doubletons)
 {
-    //calculate two hashfunc at the same time
+    //calculate three hashfunc at the same time
     var firstMod = firstHash.Hash(doubleton.Item1, doubleton.Item2);
     var secondMod = secondHash.Hash(doubleton.Item1, doubleton.Item2);
+    var thirdMod = thirdHash.Hash(doubleton.Item1, doubleton.Item2);
     //put doubletons into hash buckets
     if (fisrtBuckets.ContainsKey(firstMod))
         fisrtBuckets[firstMod].Add(doubleton);
@@ -61,6 +64,9 @@ foreach (var doubleton in doubletons)
     if (secondBuckets.ContainsKey(secondMod))
         secondBuckets[secondMod].Add(doubleton);
     else secondBuckets.Add(secondMod, new List<Tuple<int, int>> { doubleton });
+    if (thirdBuckets.ContainsKey(thirdMod))
+        thirdBuckets[thirdMod].Add(doubleton);
+    else thirdBuckets.Add(thirdMod, new List<Tuple<int, int>> { doubleton });
 }
 //now remove buckets where support is less
 var doubletonsToExclude = new List<Tuple<int, int>>();
@@ -71,6 +77,10 @@ foreach (var fromFirst in fisrtBuckets.Values.Where(elems => elems.Count < suppo
 foreach (var fromSecond in secondBuckets.Values.Where(elems => elems.Count < supportLevel))
 {
     doubletonsToExclude.AddRange(fromSecond);
+}
+foreach (var fromThird in thirdBuckets.Values.Where(elems => elems.Count < supportLevel))
+{
+    doubletonsToExclude.AddRange(fromThird);
 }
 doubletons = doubletons.Except(doubletonsToExclude).ToList();
 //now remove doubletons which contains non-frequent products
