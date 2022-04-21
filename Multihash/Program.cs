@@ -40,12 +40,13 @@ foreach (var basket in baskets.Values)
 {
     //form doubletons for each basket
     var basketOfIndexes = basket.Select(code => prodCodeToIndex[code]);
-    doubletons.AddRange(basketOfIndexes.SelectMany((item, index) => basketOfIndexes.Skip(index).Where(secondItem => item != secondItem)
+    doubletons.AddRange(basketOfIndexes.SelectMany((item, index) => basketOfIndexes.Skip(index)
+    .Where(secondItem => item != secondItem)
     .Select(secondItem => new Tuple<int, int>(item, secondItem))));
 }
 var n = prodCodeToIndex.Keys.Count;
-var firstHash = new HashFunc(1243, 12245, 20 * n);
-var secondHash = new HashFunc(2324, 4636, 20 * n);
+var firstHash = new HashFunc(1243, 12245, 40 * n);
+var secondHash = new HashFunc(2324, 4636, 40 * n);
 var fisrtBuckets = new Dictionary<int, List<Tuple<int, int>>>();
 var secondBuckets = new Dictionary<int, List<Tuple<int, int>>>();
 foreach (var doubleton in doubletons)
@@ -73,11 +74,13 @@ foreach (var fromSecond in secondBuckets.Values.Where(elems => elems.Count < sup
 }
 doubletons = doubletons.Except(doubletonsToExclude).ToList();
 //now remove doubletons which contains non-frequent products
-doubletons = doubletons.Where(doubleton => !productsToExclude.Contains(doubleton.Item1) && !productsToExclude.Contains(doubleton.Item2)).ToList();
+doubletons = doubletons.Where(doubleton => !productsToExclude.Contains(doubleton.Item1)
+&& !productsToExclude.Contains(doubleton.Item2)).ToList();
 //write result
 using (var streamWriter = new StreamWriter(Directory.GetParent(Directory.GetCurrentDirectory()).Parent + "/result.txt"))
 {
-    prodCodeToIndex.Values.ToList().Where(prod => !productsToExclude.Contains(prod)).ToList().ForEach(prod => streamWriter.Write(prod + " , "));
+    prodCodeToIndex.Values.ToList().Where(prod => !productsToExclude.Contains(prod)).ToList()
+        .ForEach(prod => streamWriter.Write(prod + " , "));
     streamWriter.WriteLine();
     doubletons.Distinct().ToList().ForEach(doubleton => streamWriter.Write(doubleton + " , "));
 }
